@@ -157,22 +157,29 @@ class HermesNativeRunner(NativeHarnessRunner):
             },
         )
 
-        # Only pass model/api_key/base_url when explicitly set; otherwise
-        # AIAgent uses its own config.yaml defaults (e.g. openai-codex).
         model_name = self._model_config.get("model_name") or ""
         if model_name:
             kwargs["model"] = model_name
 
-        api_key = self._model_config.get("api_key")
+        api_key = self._model_config.get("api_key") or ""
+        base_url = self._model_config.get("base_url") or ""
+        provider = (self._model_config.get("provider") or "").strip().lower()
+
+        # "openai" is not in Hermes' PROVIDER_REGISTRY, so we must resolve
+        # credentials ourselves.  run_agent.py loads ~/.hermes/.env at import
+        # time, so OPENAI_API_KEY is already in os.environ here.
+        if provider == "openai" and not api_key and not base_url:
+            import os
+            api_key = os.environ.get("OPENAI_API_KEY", "")
+            base_url = "https://api.openai.com/v1"
+
+        # Passing both api_key and base_url bypasses resolve_provider_client
+        # entirely; AIAgent constructs the OpenAI client directly.
         if api_key:
             kwargs["api_key"] = api_key
-
-        base_url = self._model_config.get("base_url")
         if base_url:
             kwargs["base_url"] = base_url
-
-        provider = self._model_config.get("provider")
-        if provider:
+        if provider and provider != "openai":
             kwargs["provider"] = provider
 
         return AIAgent(**kwargs)
