@@ -12,7 +12,8 @@ harness:
   adapter_class: src.native.hermes.runner.HermesNativeRunner
 
 model:
-  model_name: ""  # empty = Hermes uses its own configured default (openai-codex / gpt-5.4-mini)
+  model_name: "gpt-4o-mini"
+  provider: openai   # use OPENAI_API_KEY from ~/.hermes/.env, bypasses openai-codex browser session
   api_key: null
   base_url: null
   temperature: 0.0
