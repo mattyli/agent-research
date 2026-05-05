@@ -523,3 +523,32 @@ class TestScoringBridge:
         hr.timed_out = True
         task_output = build_task_output(hr, "http://localhost:8080/fhir/")
         assert task_output.status == SampleStatus.TASK_LIMIT_REACHED
+
+
+# ---------------------------------------------------------------------------
+# Tests: refsol check
+# ---------------------------------------------------------------------------
+
+class TestRefsol:
+    def test_missing_refsol_raises_runtime_error(self, tmp_path):
+        data_file = tmp_path / "test_data.json"
+        func_file = tmp_path / "funcs.json"
+        data_file.write_text(json.dumps([_make_case()]))
+        func_file.write_text(json.dumps([_make_func_spec()]))
+
+        config = NativeRunConfig.parse_obj({
+            "benchmark": {
+                "medagentbench_path": str(tmp_path),
+                "data_file": str(data_file),
+                "func_file": str(func_file),
+                "fhir_base_url": "http://localhost:8080/fhir/",
+            },
+            "logging": {"output_dir": str(tmp_path / "outputs")},
+        })
+
+        with patch(
+            "src.native.driver.importlib.import_module",
+            side_effect=ModuleNotFoundError("refsol"),
+        ):
+            with pytest.raises(RuntimeError, match="refsol.py not found"):
+                NativeBenchDriver(config)

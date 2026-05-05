@@ -54,6 +54,7 @@ class NativeBenchDriver:
 
     def __init__(self, config: "NativeRunConfig"):
         self.config = config
+        self._check_refsol()
         self._load_data()
         self._setup_output_dir()
         self._runner: Optional[NativeHarnessRunner] = None
@@ -85,6 +86,16 @@ class NativeBenchDriver:
                 json.dump(config_snapshot, fh, indent=2)
         except Exception as exc:
             logger.warning("Could not write config snapshot: %s", exc)
+
+    def _check_refsol(self) -> None:
+        try:
+            importlib.import_module("src.server.tasks.medagentbench.refsol")
+        except ModuleNotFoundError:
+            raise RuntimeError(
+                "refsol.py not found at src/server/tasks/medagentbench/refsol.py. "
+                "Download it from the Stanford Medicine Box link in the README and "
+                "place it at that path before running the benchmark."
+            )
 
     def _filtered_cases(self) -> List[Dict]:
         cases = self._all_cases
