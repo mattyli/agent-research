@@ -1,0 +1,36 @@
+benchmark:
+  medagentbench_path: /Users/02matt/MedAgentBench
+  task_split: all
+  task_ids: null
+  fhir_base_url: "http://localhost:8080/fhir/"
+  data_file: "data/medagentbench/test_data_v2.json"
+  func_file: "data/medagentbench/funcs_v1.json"
+  execute_post_requests: true
+
+harness:
+  name: hermes
+  adapter_class: src.native.hermes.runner.HermesNativeRunner
+
+model:
+  model_name: ""  # empty = Hermes uses its own configured default (openai-codex / gpt-5.4-mini)
+  api_key: null
+  base_url: null
+  temperature: 0.0
+  max_tokens: 4096
+
+runtime:
+  max_fhir_calls: 8
+  max_iterations: 12
+  timeout_seconds: 300
+  seed: 42
+
+memory:
+  mode: disabled
+  memory_store_path: null
+  warmup_task_ids: null
+
+logging:
+  output_dir: outputs/native
+  run_id: null
+  log_tool_calls: true
+  log_raw_harness_trace: true
