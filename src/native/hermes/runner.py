@@ -172,6 +172,10 @@ class HermesNativeRunner(NativeHarnessRunner):
             import os
             api_key = os.environ.get("OPENAI_API_KEY", "")
             base_url = "https://api.openai.com/v1"
+            # Force chat completions — Hermes auto-upgrades api.openai.com to
+            # the Responses API, which rejects non-GPT-5 models with
+            # "Encrypted content is not supported with this model."
+            kwargs["api_mode"] = "chat_completions"
 
         # Passing both api_key and base_url bypasses resolve_provider_client
         # entirely; AIAgent constructs the OpenAI client directly.
