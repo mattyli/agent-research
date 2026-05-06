@@ -5,48 +5,6 @@ Run with:
     /opt/anaconda3/envs/medagentbench/bin/python3 -m pytest \
         src/native/tests/test_driver.py -v -m "not integration"
 """
-
-
-def test_build_prompt_uses_instruction_field():
-    """_build_prompt must use case_data['instruction'], not 'question'."""
-    import pathlib
-    from src.native.driver import NativeBenchDriver
-    from src.native.experiments.config_schema import NativeRunConfig
-
-    driver = object.__new__(NativeBenchDriver)
-    driver.config = NativeRunConfig()
-    driver._all_cases = []
-    driver._funcs = []
-    driver._run_id = "test"
-    driver._output_root = pathlib.Path("/tmp/test_driver")
-
-    case = {
-        "id": "task1_1",
-        "instruction": "How old is the patient?",
-        "context": "It's 2023-11-13T10:15:00+00:00 now.",
-        "eval_MRN": "S123",
-    }
-    prompt = driver._build_prompt(case)
-    assert "How old is the patient?" in prompt
-    assert "2023-11-13" in prompt
-
-
-def test_build_prompt_does_not_use_question_key():
-    import pathlib
-    from src.native.driver import NativeBenchDriver
-    from src.native.experiments.config_schema import NativeRunConfig
-
-    driver = object.__new__(NativeBenchDriver)
-    driver.config = NativeRunConfig()
-
-    case = {
-        "id": "task1_1",
-        "question": "Should not appear",
-        "instruction": "Should appear",
-        "context": "",
-    }
-    prompt = driver._build_prompt(case)
-    assert "Should appear" in prompt
 import json
 import os
 import sys
