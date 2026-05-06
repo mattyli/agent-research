@@ -4,15 +4,13 @@ benchmark:
   task_ids: null
   fhir_base_url: "http://localhost:8080/fhir/"
   data_file: "data/medagentbench/test_data_v2.json"
-  func_file: "data/medagentbench/funcs_v1.json"
-  execute_post_requests: true
 
 harness:
   name: hermes
   adapter_class: src.native.hermes.runner.HermesNativeRunner
 
 model:
-  model_name: "gpt-4o-mini"
+  model_name: "gpt-4.1-mini"
   provider: openai   # use OPENAI_API_KEY from ~/.hermes/.env, bypasses openai-codex browser session
   api_key: null
   base_url: null
