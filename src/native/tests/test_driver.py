@@ -478,16 +478,16 @@ class TestScoringBridge:
             transcript=[
                 {"role": "user", "content": "Do the task"},
                 {"role": "assistant", "content": ""},
-                {"role": "tool", "name": "fhir_medication_request_create",
+                {"role": "tool", "name": "medication_request_create",
                  "tool_call_id": "tc1", "content": '{"status":"created"}'},
                 {"role": "assistant", "content": ""},
-                {"role": "tool", "name": "fhir_finish",
+                {"role": "tool", "name": "finish",
                  "tool_call_id": "tc2", "content": '{"status":"finished"}'},
             ],
             tool_call_log=[
                 {
                     "seq": 0,
-                    "tool": "fhir_medication_request_create",
+                    "tool": "medication_request_create",
                     "args": {"resource": {"resourceType": "MedicationRequest"}},
                     "response_preview": '{"status":"created"}',
                     "counted": True,
