@@ -289,10 +289,14 @@ class TestToolSchemas:
         assert "answer" in required
 
     def test_patient_search_requires_nothing(self):
-        """Patient search is flexible; no required fields."""
+        """Patient search is flexible; no FHIR query fields are required (only explanation)."""
         from src.native.fhir_tools import _TOOLS
         spec = next(s for s in _TOOLS if s["name"] == "patient_search")
-        assert spec["schema"]["parameters"].get("required", []) == []
+        required = spec["schema"]["parameters"].get("required", [])
+        fhir_fields = {"identifier", "name", "birthdate"}
+        assert not fhir_fields.intersection(required), (
+            f"patient_search should not require any FHIR fields, got required={required}"
+        )
 
     def test_condition_search_requires_patient(self):
         from src.native.fhir_tools import _TOOLS
