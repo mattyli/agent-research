@@ -12,7 +12,7 @@ class BenchmarkConfig(BaseModel):
     task_ids: Optional[List[str]] = None   # None = all tasks
     fhir_base_url: str = "http://localhost:8080/fhir/"
     data_file: str = "data/medagentbench/test_data_v2.json"
-    func_file: str = "data/medagentbench/funcs_v1.json"
+    func_file: Optional[str] = None
     execute_post_requests: bool = True
 
 

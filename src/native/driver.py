@@ -24,14 +24,14 @@ logger = logging.getLogger(__name__)
 # Native mode system prompt — no text-protocol instructions;
 # the agent uses typed FHIR tools registered with Hermes.
 _NATIVE_PROMPT = (
-    "You are an expert clinician's assistant using FHIR APIs to answer medical questions.\n\n"
-    "You have access to typed FHIR tools to query and update patient records. "
-    "Use them to gather all information needed to answer the question.\n\n"
-    "When you have all answers, call fhir_finish with a JSON-serializable list of answers "
-    "matching the number of sub-questions asked. "
-    "Do not call fhir_finish until you have confirmed every part of the answer.\n\n"
+    "You are an expert clinical assistant with access to typed FHIR tools.\n\n"
+    "Before calling any tool, briefly plan your approach in one sentence. "
+    "Include an 'explanation' field on every tool call saying why you are making it.\n\n"
+    "Use the calculator tool for date or numeric arithmetic instead of estimating. "
+    "When you have a complete answer, call finish with a Python list of values "
+    "matching the number of sub-questions — use int, float, str, or None for each element.\n\n"
     "Context: {context}\n\n"
-    "Question: {question}"
+    "Task: {instruction}"
 )
 
 
@@ -62,14 +62,18 @@ class NativeBenchDriver:
     def _load_data(self) -> None:
         base = Path(self.config.benchmark.medagentbench_path)
         data_path = base / self.config.benchmark.data_file
-        func_path = base / self.config.benchmark.func_file
 
         with open(data_path) as fh:
             self._all_cases: List[Dict] = json.load(fh)
-        with open(func_path) as fh:
-            self._funcs: List[Dict] = json.load(fh)
 
-        logger.info("Loaded %d cases and %d functions", len(self._all_cases), len(self._funcs))
+        if self.config.benchmark.func_file:
+            func_path = base / self.config.benchmark.func_file
+            with open(func_path) as fh:
+                self._funcs: List[Dict] = json.load(fh)
+        else:
+            self._funcs = []
+
+        logger.info("Loaded %d cases", len(self._all_cases))
 
     def _setup_output_dir(self) -> None:
         run_id = self.config.logging.run_id or (
@@ -89,12 +93,12 @@ class NativeBenchDriver:
 
     def _check_refsol(self) -> None:
         try:
-            importlib.import_module("src.server.tasks.medagentbench.refsol")
+            importlib.import_module("src.server.tasks.medagentbench.new_refsol")
         except ModuleNotFoundError:
             raise RuntimeError(
-                "refsol.py not found at src/server/tasks/medagentbench/refsol.py. "
-                "Download it from the Stanford Medicine Box link in the README and "
-                "place it at that path before running the benchmark."
+                "new_refsol.py not found at src/server/tasks/medagentbench/new_refsol.py. "
+                "This file should be present in the repository. "
+                "If missing, copy it from the MedAgentBenchV2 repo."
             )
 
     def _filtered_cases(self) -> List[Dict]:
@@ -127,7 +131,7 @@ class NativeBenchDriver:
     def _build_prompt(self, case_data: Dict) -> str:
         return _NATIVE_PROMPT.format(
             context=case_data.get("context", ""),
-            question=case_data.get("instruction", ""),
+            instruction=case_data.get("instruction", ""),
         )
 
     def _instantiate_runner(self) -> NativeHarnessRunner:
