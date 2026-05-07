@@ -17,3 +17,4 @@ medagentbench-v2-std:
     name: medagentbench-v2-std
     data_file: "data/medagentbench/test_data_v2.json"
     func_file: "data/medagentbench/funcs_v2.json"
+    max_round: 12
