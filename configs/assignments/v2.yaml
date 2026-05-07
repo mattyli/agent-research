@@ -1,0 +1,15 @@
+import: definition.yaml
+
+concurrency:
+  task:
+    medagentbench-v2-std: 20
+  agent:
+    gpt-5.4-nano: 10
+
+assignments:
+  - agent:
+      - gpt-5.4-nano
+    task:
+      - medagentbench-v2-std
+
+output: "outputs/MedAgentBenchv2"

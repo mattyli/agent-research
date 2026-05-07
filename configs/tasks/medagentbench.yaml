@@ -10,3 +10,10 @@ medagentbench-std:
     name: medagentbench-std
     data_file: "data/medagentbench/test_data_v2.json"
     func_file: "data/medagentbench/funcs_v1.json"
+
+medagentbench-v2-std:
+  module: src.server.tasks.medagentbench.medagentbench_v2.MedAgentBenchV2
+  parameters:
+    name: medagentbench-v2-std
+    data_file: "data/medagentbench/test_data_v2.json"
+    func_file: "data/medagentbench/funcs_v2.json"
