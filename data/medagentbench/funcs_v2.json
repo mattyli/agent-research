@@ -1,0 +1,150 @@
+[
+  {
+    "name": "patient_search (GET {api_base}/Patient)",
+    "description": "Search for a FHIR Patient record. Returns matching patient resources including patient ID (used as the 'patient' parameter in other tools). Provide at least one of identifier, name, or birthdate.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "identifier": {"type": "string", "description": "Patient MRN or other identifier."},
+        "name": {"type": "string", "description": "Patient name token (family or given). Use a single token (e.g. 'Stafford'), not a full name."},
+        "birthdate": {"type": "string", "description": "Patient date of birth in YYYY-MM-DD format."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["explanation"]
+    }
+  },
+  {
+    "name": "condition_search (GET {api_base}/Condition)",
+    "description": "Search the patient's problem list (Condition resources). Use category='problem-list-item' for the standard problem list.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "patient": {"type": "string", "description": "FHIR Patient resource ID."},
+        "category": {"type": "string", "description": "Condition category, typically 'problem-list-item'."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["patient", "explanation"]
+    }
+  },
+  {
+    "name": "observation_search (GET {api_base}/Observation)",
+    "description": "Search lab results (Observation resources). Provide a friendly lab code such as 'K', 'A1C', 'MG', 'GLU', 'NA' — not a LOINC string.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "patient": {"type": "string", "description": "FHIR Patient resource ID."},
+        "code": {"type": "string", "description": "Lab code (e.g. 'K', 'A1C', 'MG', 'GLU', 'NA')."},
+        "date": {"type": "string", "description": "Filter by date (YYYY-MM-DD) or date range (e.g. ge2023-01-01)."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["patient", "code", "explanation"]
+    }
+  },
+  {
+    "name": "vitals_search (GET {api_base}/Observation)",
+    "description": "Search vital sign observations (Observation resources with category vital-signs).",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "patient": {"type": "string", "description": "FHIR Patient resource ID."},
+        "category": {"type": "string", "description": "Must be 'vital-signs'."},
+        "date": {"type": "string", "description": "Filter by date or date range (e.g. ge2023-11-12)."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["patient", "category", "explanation"]
+    }
+  },
+  {
+    "name": "vitals_create (POST {api_base}/Observation)",
+    "description": "Create (POST) a vital signs Observation resource. The payload must be valid FHIR Observation JSON with resourceType='Observation', category vital-signs, effectiveDateTime, status='final', code with text set to the flowsheet ID (e.g. 'BP'), valueString, and subject reference.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "resourceType": {"type": "string", "description": "Use 'Observation'."},
+        "category": {"type": "array", "description": "Use [{\"coding\": [{\"system\": \"http://hl7.org/fhir/observation-category\", \"code\": \"vital-signs\", \"display\": \"Vital Signs\"}]}]"},
+        "code": {"type": "object", "description": "The flowsheet ID as text, e.g. {\"text\": \"BP\"}."},
+        "effectiveDateTime": {"type": "string", "description": "ISO datetime of the observation."},
+        "status": {"type": "string", "description": "Use 'final'."},
+        "valueString": {"type": "string", "description": "Measurement value as a string, e.g. '120/80 mmHg'."},
+        "subject": {"type": "object", "description": "Patient reference, e.g. {\"reference\": \"Patient/123\"}."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["resourceType", "category", "code", "effectiveDateTime", "status", "valueString", "subject", "explanation"]
+    }
+  },
+  {
+    "name": "medication_request_search (GET {api_base}/MedicationRequest)",
+    "description": "Search MedicationRequest resources for a patient.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "patient": {"type": "string", "description": "FHIR Patient resource ID."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["patient", "explanation"]
+    }
+  },
+  {
+    "name": "medication_request_create (POST {api_base}/MedicationRequest)",
+    "description": "Create (POST) a MedicationRequest resource to order a medication. Must include resourceType, medicationCodeableConcept with NDC code, subject reference, status='active', intent='order', authoredOn, and dosageInstruction.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "resourceType": {"type": "string", "description": "Use 'MedicationRequest'."},
+        "medicationCodeableConcept": {"type": "object", "description": "Medication with coding array (system, code, display) and text."},
+        "authoredOn": {"type": "string", "description": "Date the prescription was written (ISO format)."},
+        "dosageInstruction": {"type": "array", "description": "Dosage instructions array."},
+        "status": {"type": "string", "description": "Use 'active'."},
+        "intent": {"type": "string", "description": "Use 'order'."},
+        "subject": {"type": "object", "description": "Patient reference, e.g. {\"reference\": \"Patient/123\"}."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["resourceType", "medicationCodeableConcept", "authoredOn", "dosageInstruction", "status", "intent", "subject", "explanation"]
+    }
+  },
+  {
+    "name": "procedure_search (GET {api_base}/Procedure)",
+    "description": "Search Procedure resources for a patient.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "patient": {"type": "string", "description": "FHIR Patient resource ID."},
+        "date": {"type": "string", "description": "Date or period the procedure was performed."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["patient", "explanation"]
+    }
+  },
+  {
+    "name": "service_request_create (POST {api_base}/ServiceRequest)",
+    "description": "Create (POST) a ServiceRequest resource to order a procedure or consult. Must include resourceType='ServiceRequest', code with SNOMED or LOINC coding, subject reference, status='active', intent='order', priority='stat', authoredOn. For referral orders include note.text with the free-text narrative.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "resourceType": {"type": "string", "description": "Use 'ServiceRequest'."},
+        "code": {"type": "object", "description": "Procedure code with coding array (system, code, display)."},
+        "authoredOn": {"type": "string", "description": "Order datetime in ISO format."},
+        "status": {"type": "string", "description": "Use 'active'."},
+        "intent": {"type": "string", "description": "Use 'order'."},
+        "priority": {"type": "string", "description": "Use 'stat'."},
+        "subject": {"type": "object", "description": "Patient reference, e.g. {\"reference\": \"Patient/123\"}."},
+        "note": {"type": "object", "description": "Free-text narrative, e.g. {\"text\": \"SBAR narrative here\"}."},
+        "occurrenceDateTime": {"type": "string", "description": "Scheduled datetime in ISO format."},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["resourceType", "code", "authoredOn", "status", "intent", "priority", "subject", "explanation"]
+    }
+  },
+  {
+    "name": "calculator (GET {api_base}/calculator)",
+    "description": "Evaluate a Python arithmetic expression safely. Supports math operators, datetime, timedelta, and Decimal. Use for date arithmetic (e.g. days since last procedure) and numeric calculations before calling FINISH.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "expression": {"type": "string", "description": "A Python expression to evaluate. May use: arithmetic operators, datetime(), timedelta(), math.*, abs(), round(), int(), float(), len(), min(), max(), sum(). Example: (datetime(2023,11,13) - datetime(1985,4,20)).days // 365"},
+        "explanation": {"type": "string", "description": "One sentence justifying this tool call before executing it."}
+      },
+      "required": ["expression", "explanation"]
+    }
+  }
+]
