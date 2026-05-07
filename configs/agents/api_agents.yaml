@@ -4,6 +4,7 @@ gpt-5.4-nano:
         name: "gpt-5.4-nano"
         body:
             model: "gpt-5.4-nano"
+            max_completion_tokens: 4096
 
 gpt-4o-mini:
     import: "./openai-chat.yaml"
